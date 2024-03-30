@@ -3,10 +3,18 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <nav>
   <h1>Flaskr</h1>
+  <form method="get" action="{{ url_for('search') }}">
+      <input type="text" name="query" placeholder="Search...">
+      <button type="submit">Search</button>
+  </form>
   <ul>
     {% if g.user %}
-      <li><span>{{ g.user['username'] }}</span>
+      <li><span>{{ g.user['name'] }}</span>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+        <li><a href="{{ url_for('auth.announce') }}">Create Announcement</a>
+          <li><a href="{{ url_for('auth.event') }}">Create Event</a>
+            <li><a href="{{ url_for('auth.feed') }}">Feed</a>
+              <li><a href="{{ url_for('auth.for_you') }}">For You</a>
     {% else %}
       <li><a href="{{ url_for('auth.register') }}">Register</a>
       <li><a href="{{ url_for('auth.login') }}">Log In</a>
@@ -22,3 +30,4 @@
   {% endfor %}
   {% block content %}{% endblock %}
 </section>
+
