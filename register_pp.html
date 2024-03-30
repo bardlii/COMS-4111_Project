@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Register as Personal Profile{% endblock %}
+
+{% block header %}
+  <h1>Register as Personal Profile</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" required><br>
+
+    <label for="email">Email:</label>
+    <input type="email" name="email" id="email" required><br>
+
+    <label for="bio">Bio:</label><br>
+    <textarea name="bio" id="bio" rows="4" cols="50"></textarea><br>
+
+    <label for="image_url">Enter an image URL for your profile page:</label>
+    <input type="text" name="image_url" id="image_url"><br>
+
+    <label for="field">Field:</label>
+    <input type="text" name="field" id="field"><br>
+
+    <label for="education">Education:</label>
+    <input type="text" name="education" id="education"><br>
+
+    <label for="employment_status">Employment status (Enter "1" if employed, "2" if you are unemployed):</label>
+    <input type="text" name="employment_status" id="employment_status"><br>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" name="dob" id="dob" required><br>
+
+    <label for="location">Location:</label>
+    <input type="text" name="location" id="location" required><br>
+
+    <label for="position">Current or most recent filled position:</label>
+    <input type="text" name="position" id="position" required><br>
+
+    <label for="position_seeking">Role or position you would be interested/are currently seeking:</label>
+    <input type="text" name="position_seeking" id="position_seeking" required><br>
+
+    
+    
+
+    <input type="submit" value="Register">
+  </form>
+{% endblock %}
+</html>
