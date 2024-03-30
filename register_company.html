@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Register as Company{% endblock %}
+
+{% block header %}
+  <h1>Register as Company</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" required><br>
+
+    <label for="email">Email:</label>
+    <input type="email" name="email" id="email" required><br>
+
+    <label for="bio">Bio:</label><br>
+    <textarea name="bio" id="bio" rows="4" cols="50"></textarea><br>
+
+    <label for="image_url">Enter an image URL for your profile page:</label>
+    <input type="text" name="image_url" id="image_url"><br>
+
+    <label for="field">Field:</label>
+    <input type="text" name="field" id="field"><br>
+
+    <input type="submit" value="Register">
+  </form>
+{% endblock %}
+
+</html>
