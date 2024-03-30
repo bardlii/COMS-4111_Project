@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Feed{% endblock %}
+
+{% block header %}
+  <h1>Feed</h1>
+{% endblock %}
+
+{% block content %}
+  <div class="feed">
+    {% for post in user_feed %}
+      <div class="post">
+        <h3>{{ post.title }}</h3>
+        <p>Posted by {{ post.author }} on {{ post.date }}</p>
+        <p>{{ post.content }}</p>
+
+        <h4>Reactions:</h4>
+        <ul>
+          {% for reaction in post.reactions %}
+            <li>{{ reaction.user }} reacted with {{ reaction.reaction }}</li>
+          {% endfor %}
+        </ul>
+
+        <form method="post" action="{{ url_for('add_reaction', post_id=post.id) }}">
+          <label for="reaction">Reaction:</label>
+          <input type="text" name="reaction" id="reaction" required>
+          <label for="comment">Comment:</label>
+          <input type="text" name="comment" id="comment">
+          <input type="submit" value="React">
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+
+</html>
