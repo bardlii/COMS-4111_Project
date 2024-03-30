@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user_name }}'s Profile</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file here -->
+</head>
+<body>
+    <h1>{{ user_name }}'s Profile</h1>
+    <div class="profile-info">
+        <h2>User Information</h2>
+        <p><strong>User ID:</strong> {{ user_id }}</p>
+        <p><strong>Education:</strong> {{ education }}</p>
+        <p><strong>Employment Status:</strong> {{ employment_status }}</p>
+        <p><strong>Date of Birth:</strong> {{ date_of_birth }}</p>
+        <p><strong>Location:</strong> {{ location }}</p>
+        <p><strong>Position:</strong> {{ position }}</p>
+        <p><strong>Position Seeking:</strong> {{ position_seeking }}</p>
+    </div>
+
+    <div class="user-posts">
+        <h2>User Posts</h2>
+        {% if posts %}
+            <ul>
+                {% for post in posts %}
+                    <li>{{ post.content }} - {{ post.date }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No posts found.</p>
+        {% endif %}
+    </div>
+
+    <a href="message.html?user_id={{ user_id }}">Message User</a>
+
+</body>
+</html>
