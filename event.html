@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Create Event{% endblock %}
+
+{% block header %}
+  <h1>Create Event</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="announcement_text">Event Description:</label><br>
+    <textarea name="announcement_text" id="announcement_text" rows="10" cols="50" required></textarea><br>
+
+    <label for="image_url">Enter the URL of the image you would like to display with your event post:</label>
+    <input type="text" name="image_url" id="image_url"><br>
+
+    <label for="associated_date">Date of the Event:</label>
+    <input type="date" name="associated_date" id="associated_date"><br>
+
+    <input type="submit" value="Create Announcement">
+  </form>
+{% endblock %}
