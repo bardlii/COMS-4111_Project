@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <h1>Conversation with {{ other_user }}</h1>
+    <div>
+        {% for message in messages %}
+            {% if message.sender == current_user %}
+                <div style="text-align: right;">
+                    <p>{{ message.text }}</p>
+                    <small>{{ message.text_date }}</small>
+                </div>
+            {% else %}
+                <div>
+                    <p>{{ message.text }}</p>
+                    <small>{{ message.text_date }}</small>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <form action="/send_message" method="post">
+        <input type="hidden" name="receiver" value="{{ other_user }}">
+        <textarea name="text" placeholder="Type your message here..." required></textarea>
+        <button type="submit">Send</button>
+    </form>
+</body>
+</html>
