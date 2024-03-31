@@ -11,9 +11,9 @@
   <div class="feed">
     {% for post in user_feed %}
       <div class="post">
-        <h3>{{ post.title }}</h3>
-        <p>Posted by {{ post.author }} on {{ post.date }}</p>
-        <p>{{ post.content }}</p>
+        <p>Posted by {{ post['user_id'] }} on {{ post[creation_date] }}</p>
+        <p>{{ post[image_url] }}</p>
+        <p>{{ post[text] }}</p>
 
         <h4>Reactions:</h4>
         <ul>

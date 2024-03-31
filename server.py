@@ -16,7 +16,7 @@ from flask import Flask, request, render_template, g, redirect, Response, Bluepr
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+#bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 #
@@ -34,7 +34,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 DATABASE_USERNAME = "jtj2127"
 DATABASE_PASSWRD = "jtj2127"
 DATABASE_HOST = "35.212.75.104" # change to 34.28.53.86 if you used database 2 for part 2
-DATABASEURI = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWRD}@{DATABASE_HOST}/project1"
+DATABASEURI = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWRD}@{DATABASE_HOST}/proj1part2"
 
 
 #
@@ -57,7 +57,7 @@ with engine.connect() as conn:
 	insert_table_command = """INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace')"""
 	res = conn.execute(text(insert_table_command))
 	# you need to commit for create, insert, update queries to reflect
-	conn.commit()
+	# conn.commit()
 
 
 @app.before_request
@@ -194,10 +194,10 @@ def add():
 	#based on user_id
 	#user_id = request.form['user_id']
 
-@bp.route('/login', methods=('POST'))
+@app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['user_id']
+        username = request.form['email']
         #password = request.form['password']
         #db = get_db()
         error = None
@@ -217,14 +217,32 @@ def login():
 
         flash(error)
 
-    return render_template('auth/login.html')
+    return render_template('login.html')
 
-@bp.route('/logout')
+@app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-
+@app.route('/feed')
+def feed():
+    posts = g.conn.execute(
+        'SELECT user.id, post_number, creation_date, image_url, text'
+        ' FROM post p'
+        ' ORDER BY creation_date DESC'
+    ).fetchall()
+#	reactions = g.conn.execute(
+#		'SELECT reaction, comment'
+#		' FROM post_interaction pi'
+#	).fetchall()
+#    return render_template('feed.html', posts=posts)
+#	posts = text("""
+#		SELECT *
+#		FROM
+#	"""
+#	)
+#	post_results = connection.execute(posts, user_id=user_id)
+		
 
 
 if __name__ == "__main__":
