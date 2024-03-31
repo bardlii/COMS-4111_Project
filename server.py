@@ -237,11 +237,16 @@ def feed():
 #	).fetchall()
 #    return render_template('feed.html', posts=posts)
 #	posts = text("""
-#		SELECT *
-#		FROM
+#		SELECT user.id, post_number, creation_date, image_url, text
+#		FROM post p
+#		ORDER BY creation_date DESC
 #	"""
 #	)
-#	post_results = connection.execute(posts, user_id=user_id)
+	reactions = text("""
+		'SELECT reaction, comment'
+	"""
+	)
+#	post_results = conn.execute(posts, user_id='user_id', post_number=).fetchall
 		
 
 

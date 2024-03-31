@@ -17,7 +17,7 @@
 
         <h4>Reactions:</h4>
         <ul>
-          {% for reaction in post.reactions %}
+          {% for reaction in post[reactions] %}
             <li>{{ reaction.user }} reacted with {{ reaction.reaction }}</li>
           {% endfor %}
         </ul>
