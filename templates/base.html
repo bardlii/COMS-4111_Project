@@ -7,14 +7,14 @@
   <ul>
     {% if g.user %}
       <li><span>{{ g.user['name'] }}</span>
-      <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-        <li><a href="{{ url_for('auth.announce') }}">Create Announcement</a>
-          <li><a href="{{ url_for('auth.event') }}">Create Event</a>
-            <li><a href="{{ url_for('auth.feed') }}">Feed</a>
-              <li><a href="{{ url_for('auth.for_you') }}">For You</a>
+      <li><a href="{{ url_for('logout') }}">Log Out</a>
+        <li><a href="{{ url_for('announce') }}">Create Announcement</a>
+          <li><a href="{{ url_for('event') }}">Create Event</a>
+            <li><a href="{{ url_for('feed') }}">Feed</a>
+              <li><a href="{{ url_for('for_you') }}">For You</a>
     {% else %}
-      <li><a href="{{ url_for('auth.register') }}">Register</a>
-      <li><a href="{{ url_for('auth.login') }}">Log In</a>
+      <li><a href="{{ url_for('register') }}">Register</a>
+      <li><a href="{{ url_for('login') }}">Log In</a>
     {% endif %}
   </ul>
 </nav>
