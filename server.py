@@ -15,8 +15,11 @@ from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, Blueprint, flash, session, url_for
 from datetime import date
 
+from sqlalchemy.sql import text
+
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
+app.secret_key=b'my_secret_key'
 #bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
@@ -203,9 +206,8 @@ def login():
         #password = request.form['password']
         #db = get_db()
         error = None
-        user = g.conn.execute(
-            "SELECT * FROM users WHERE user_id = :user_id", {"user_id": user_id}
-        ).fetchone()
+        user = text("SELECT * FROM users WHERE user_id = :user_id")
+        user_out = g.conn.execute(user, {"user_id": user_id}).fetchone()
 
         if user is None:
             error = 'Incorrect username.'
@@ -214,40 +216,45 @@ def login():
 
         if error is None:
             session.clear()
-            session['user_id'] = user['user_id']
+            session['user_id'] = user_out['user_id']
             return redirect(url_for('feed'))
 
         flash(error)
 
     return render_template('login.html')
 
-@app.route('/<username>')
+@app.route('/login/<username>')
 def user_profile(username):
     # Check if the user is a personal profile
+    confirm = text(
+        "SELECT * FROM personal_profile WHERE user_id = :username"
+	)
+    #confirm = confirm.bindparams(user_id='jd001')
+    #personal_profile = g.conn.execute(confirm, user_id='jd001').fetchone()
     personal_profile = g.conn.execute(
-        "SELECT * FROM personal_profile WHERE user_id = :username", {"username": username}
+       text("SELECT * FROM personal_profile WHERE user_id = :username"), {"username": username}
     ).fetchone()
 
     # If personal profile exists, render personal_profile.html
     if personal_profile:
         posts = g.conn.execute(
-            "SELECT * FROM post WHERE user_id = :username", {"username": username}
+            text("SELECT * FROM post WHERE user_id = :username"), {"username": username}
         ).fetchall()
         return render_template('personal_profile.html', user_name=personal_profile['Name'], user_id=personal_profile['User_id'], education=personal_profile['Education'], bio=personal_profile['Bio'], image=personal_profile['Image_URL'], employment_status=personal_profile['Employment_status'], date_of_birth=personal_profile['Date_of_birth'], location=personal_profile['Location'], position=personal_profile['Position'], position_seeking=personal_profile['Position_seeking'])
 
     # Check if the user is a company profile
     company_profile = g.conn.execute(
-        "SELECT * FROM company WHERE user_id = :username", {"username": username}
+        text("SELECT * FROM company WHERE user_id = :username"), {"username": username}
     ).fetchone()
 
     # If company profile exists, render company_profile.html
     if company_profile:
         posts = g.conn.execute(
-            "SELECT * FROM post WHERE user_id = :username", {"username": username}
+            text("SELECT * FROM post WHERE user_id = :username"), {"username": username}
         ).fetchall()
         # Retrieve additional data for company profile
         job_listings = g.conn.execute(
-            "SELECT * FROM job_listing WHERE user_id = :username", {"username": username}
+            text("SELECT * FROM job_listing WHERE user_id = :username"), {"username": username}
         ).fetchall()
 
         return render_template('company_profile.html', user_name=company_profile['Name'], user_id=company_profile['User_id'], location=company_profile['Location'], bio=company_profile['Bio'], image=company_profile['Image_URL'], job_listings=job_listings)
@@ -265,11 +272,11 @@ def create_event():
 
         try:
             g.conn.execute(
-                'INSERT INTO POST (User_id, Creation_date, Image_URL, Text) VALUES (?, ?, ?, ?)',
+                text('INSERT INTO POST (User_id, Creation_date, Image_URL, Text) VALUES (?, ?, ?, ?)'),
                 (user_id, creation_date, image_url, event_description)
             )
             g.conn.execute(
-                'INSERT INTO EVENT (User_id, Post_number, Associated_date) VALUES (?, (SELECT MAX(Post_number) FROM POST WHERE User_id = ?), ?)',
+                text('INSERT INTO EVENT (User_id, Post_number, Associated_date) VALUES (?, (SELECT MAX(Post_number) FROM POST WHERE User_id = ?), ?)'),
                 (user_id, user_id, associated_date)
             )
             g.conn.commit()
@@ -296,11 +303,11 @@ def announce():
 
         try:
             g.conn.execute(
-                'INSERT INTO POST (User_id, Creation_date, Image_URL, Text) VALUES (?, ?, ?, ?)',
+                text('INSERT INTO POST (User_id, Creation_date, Image_URL, Text) VALUES (?, ?, ?, ?)'),
                 (user_id, creation_date, image_url, announcement_text)
             )
             g.conn.execute(
-                'INSERT INTO ANNOUNCEMENT (User_id, Post_number) VALUES (?, (SELECT MAX(Post_number) FROM POST WHERE User_id = ?))',
+                text('INSERT INTO ANNOUNCEMENT (User_id, Post_number) VALUES (?, (SELECT MAX(Post_number) FROM POST WHERE User_id = ?))'),
                 (user_id, user_id)
             )
             g.conn.commit()
@@ -325,10 +332,10 @@ def feed():
 	if request.method == 'POST':
 		reaction = request.form['reaction']
 		comment = request.form['comment']
-		g.conn.execute("""
+		reaction_out = g.conn.execute(text("""
             INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
             VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
-        """, {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
+        """), {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
 		)
 	posts = text("""
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
@@ -337,8 +344,8 @@ def feed():
         LEFT JOIN POST_INTERACTION AS PI ON P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number
         WHERE C.User_id1 = :user_id
     """)
-	post_out = g.conn.execute(posts, {"person_user_id": user_id}).fetchall()
-	return render_template('feed.html', user_feed=post_out)
+	post_out = g.conn.execute(posts, {"user_id": user_id}).fetchall()
+#	return render_template('feed.html', p.user_id=post_out['Post_owner_id'], post_out['Post_creation_date'], post_out['Post_text'], reaction_out['Post_owner_id'], reaction_out['Post_number'], post_out['Post_number'], reaction_out['Reacting_user_id'], reaction_out['Reaction'], reaction_out['Comment']})
 
 @app.route('/for_you', methods=['GET','POST'])
 def for_you():
@@ -346,10 +353,10 @@ def for_you():
     if request.method == 'POST':
         reaction = request.form['reaction']
         comment = request.form['comment']
-        g.conn.execute("""
+        g.conn.execute(text("""
             INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
             VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
-        	""", {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
+        	"""), {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
         )
     page = text("""
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
@@ -405,10 +412,10 @@ def conversation(username):
     """), {'current_user': user_id, 'other_user': username}).fetchall()
     if request.method == 'POST':
         message = request.form['message']
-        g.conn.execute("""
+        g.conn.execute(text("""
 			INSERT INTO message (sender, receiver, text, text_date)
             VALUES (:user_id, :username, :message, :date)
-			""", {"user_id": user_id, "username": username, "message": message, "date": date.today()}
+			"""), {"user_id": user_id, "username": username, "message": message, "date": date.today()}
             ).fetchall()
 
     return render_template('conversation.html', messages=messages, other_user=username)
