@@ -103,29 +103,30 @@ def teardown_request(exception):
 #
 @app.route('/')
 def index():
-	"""
-	request is a special object that Flask provides to access web request information:
-
-	request.method:   "GET" or "POST"
-	request.form:     if the browser submitted a form, this contains the data in the form
-	request.args:     dictionary of URL arguments, e.g., {a:1, b:2} for http://localhost?a=1&b=2
-
-	See its API: https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data
-	"""
-
-	# DEBUG: this is debugging code to see what request looks like
-	print(request.args)
-
-
+	return redirect('/login')
+#	"""
+#	request is a special object that Flask provides to access web request information:
+#
+#	request.method:   "GET" or "POST"
+#	request.form:     if the browser submitted a form, this contains the data in the form
+#	request.args:     dictionary of URL arguments, e.g., {a:1, b:2} for http://localhost?a=1&b=2
+#
+#	See its API: https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data
+#	"""
+#
+#	# DEBUG: this is debugging code to see what request looks like
+#	print(request.args)
+#
+#
 	#
 	# example of a database query
 	#
-	select_query = "SELECT name from test"
-	cursor = g.conn.execute(text(select_query))
-	names = []
-	for result in cursor:
-		names.append(result[0])
-	cursor.close()
+#	select_query = "SELECT name from test"
+#	cursor = g.conn.execute(text(select_query))
+#	names = []
+#	for result in cursor:
+#		names.append(result[0])
+#	cursor.close()
 
 	#
 	# Flask uses Jinja templates, which is an extension to HTML where you can
@@ -153,14 +154,14 @@ def index():
 	#     <div>{{n}}</div>
 	#     {% endfor %}
 	#
-	context = dict(data = names)
+#	context = dict(data = names)
 
 
 	#
 	# render_template looks in the templates/ folder for files.
 	# for example, the below file reads template/index.html
 	#
-	return render_template("index.html", **context)
+#	return render_template("index.html", **context)
 
 #
 # This is an example of a different path.  You can see it at:
@@ -213,7 +214,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            return redirect(url_for('feed'))
 
         flash(error)
 
@@ -226,27 +227,19 @@ def logout():
 
 @app.route('/feed')
 def feed():
-    posts = g.conn.execute(
-        'SELECT user.id, post_number, creation_date, image_url, text'
-        ' FROM post p'
-        ' ORDER BY creation_date DESC'
-    ).fetchall()
-#	reactions = g.conn.execute(
-#		'SELECT reaction, comment'
-#		' FROM post_interaction pi'
-#	).fetchall()
-#    return render_template('feed.html', posts=posts)
-#	posts = text("""
-#		SELECT user.id, post_number, creation_date, image_url, text
-#		FROM post p
-#		ORDER BY creation_date DESC
-#	"""
-#	)
-	reactions = text("""
-		'SELECT reaction, comment'
+	posts = text("""
+		SELECT user_id, post_number, creation_date, image_url, text
+		FROM post p
+		ORDER BY creation_date DESC
 	"""
 	)
-#	post_results = conn.execute(posts, user_id='user_id', post_number=).fetchall
+	reactions = text("""
+		SELECT reaction, comment
+		FROM post_interaction pi
+	""")
+	post_out = g.conn.execute(posts).fetchall()
+	reactions_out = g.conn.execute(reactions).fetchall()
+	return render_template('feed.html')
 		
 
 

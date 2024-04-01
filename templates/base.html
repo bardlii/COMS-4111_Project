@@ -1,8 +1,8 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Loopedin</title>
+<title>{% block title %}{% endblock %} - LoopedIn</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <nav>
-  <h1>Loopedin</h1>
+  <h1>LoopedIn</h1>
   
   <ul>
     {% if g.user %}
@@ -13,7 +13,7 @@
             <li><a href="{{ url_for('feed') }}">Feed</a>
               <li><a href="{{ url_for('for_you') }}">For You</a>
     {% else %}
-      <li><a href="{{ url_for('register') }}">Register</a>
+      
       <li><a href="{{ url_for('login') }}">Log In</a>
     {% endif %}
   </ul>

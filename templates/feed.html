@@ -11,14 +11,14 @@
   <div class="feed">
     {% for post in user_feed %}
       <div class="post">
-        <p>Posted by {{ post['user_id'] }} on {{ post[creation_date] }}</p>
-        <p>{{ post[image_url] }}</p>
-        <p>{{ post[text] }}</p>
+        <p>Posted by {{ post['user_id'] }} on {{ post['creation_date'] }}</p>
+        <p>{{ post['image_url'] }}</p>
+        <p>{{ post['text'] }}</p>
 
         <h4>Reactions:</h4>
         <ul>
-          {% for reaction in post[reactions] %}
-            <li>{{ reaction.user }} reacted with {{ reaction.reaction }}</li>
+          {% for reaction in post_interaction['reaction'] %}
+            <li>{{ post_interaction['reacting_user_id'] }} reacted with {{ post_interaction['reaction'] }}</li>
           {% endfor %}
         </ul>
 
