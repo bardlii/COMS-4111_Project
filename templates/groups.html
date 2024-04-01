@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Groups{% endblock %}
+
+{% block content %}
+    <h1>Groups:</h1>
+    <div>
+        <ul>
+            {% for group in groups %}
+                <li>
+                    <strong>Group ID:</strong> {{ group.Group_id }}<br>
+                    <strong>Number of Members:</strong> {{ group.Number_of_members }}<br>
+                    <strong>Privacy Status:</strong> {{ group.Privacy_status }}<br>
+                    <strong>Description:</strong> {{ group.Description }}<br>
+                    <strong>Image URL:</strong> {{ group.Image_URL }}<br>
+                    <strong>Location:</strong> {{ group.Location }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h2>Join a Group</h2>
+        <form action="/join_group" method="post">
+            <label for="group_name">Enter the group ID of the group you would like to join. NOTE! You cannot join a private group :</label>
+            <input type="text" id="group_name" name="group_name" placeholder="Enter group name" required>
+            <button type="submit">Join</button>
+        </form>
+    </div>
+{% endblock %}

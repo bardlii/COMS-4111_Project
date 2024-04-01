@@ -34,7 +34,7 @@
         {% endif %}
     </div>
 
-    <a href="message.html?user_id={{ user_id }}">Message User</a>
+    <a href="{{ url_for('conversation_with', username=user_id) }}">Message User</a>
 
 </body>
 </html>
