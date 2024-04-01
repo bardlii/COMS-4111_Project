@@ -8,19 +8,19 @@
         /* Add your CSS styles here */
     </style>
 </head>
-<body>
+<body>      
     <h1>Conversation with {{ other_user }}</h1>
     <div>
         {% for message in messages %}
-            {% if message.sender == current_user %}
+            {% if messages['sender']== current_user %}
                 <div style="text-align: right;">
                     <p>{{ message.text }}</p>
-                    <small>{{ message.text_date }}</small>
+                    <small>{{ message['text_date'] }}</small>
                 </div>
             {% else %}
                 <div>
-                    <p>{{ message.text }}</p>
-                    <small>{{ message.text_date }}</small>
+                    <p>{{ messages['text'] }}</p>
+                    <small>{{ message['text_date'] }}</small>
                 </div>
             {% endif %}
         {% endfor %}
