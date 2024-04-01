@@ -194,16 +194,16 @@ def add():
 #def login():
 	#based on user_id
 	#user_id = request.form['user_id']
-
+user_id = ""
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['email']
+        user_id = request.form['user_id']
         #password = request.form['password']
         #db = get_db()
         error = None
         user = g.conn.execute(
-            'SELECT * FROM users WHERE username = ?', (username,)
+            'SELECT * FROM users WHERE user_id = ?', (user_id,)
         ).fetchone()
 
         if user is None:
