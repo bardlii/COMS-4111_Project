@@ -230,9 +230,6 @@ def user_profile(username):
 
     # If personal profile exists, render personal_profile.html
     if personal_profile:
-        posts = g.conn.execute(
-            'SELECT * FROM post WHERE user_id = ?', (username,)
-        ).fetchall()
         return render_template('personal_profile.html', user_name=personal_profile['Name'], user_id=personal_profile['User_id'], education=personal_profile['Education'], bio=personal_profile['Bio'], image=personal_profile['Image_URL'], employment_status=personal_profile['Employment_status'], date_of_birth=personal_profile['Date_of_birth'], location=personal_profile['Location'], position=personal_profile['Position'], position_seeking=personal_profile['Position_seeking'])
 
     # Check if the user is a company profile
@@ -245,10 +242,6 @@ def user_profile(username):
         # Retrieve additional data for company profile
         job_listings = g.conn.execute(
             'SELECT * FROM job_listing WHERE user_id = ?', (username,)
-        ).fetchall()
-
-        posts = g.conn.execute(
-            'SELECT * FROM post WHERE user_id = ?', (username,)
         ).fetchall()
 
         return render_template('company_profile.html', user_name=company_profile['Name'], user_id=company_profile['User_id'], location=company_profile['Location'], bio=company_profile['Bio'], image=company_profile['Image_URL'], job_listings=job_listings)
@@ -384,7 +377,23 @@ def for_you():
     """)
     page_out = g.conn.execute(page, {"user_id": user_id}).fetchall()
     return render_template('for_you.html', page_out=page_out)
-		
+
+@app.route('/conversation_with', methods=['GET','POST'])
+def conversation(other_user):
+    current_user = session.get('user_id')
+    if current_user is None:
+        return redirect(url_for('login'))
+    
+    messages = g.conn.execute(text("""
+        SELECT sender, receiver, text, text_date
+        FROM messages
+        WHERE (sender = :current_user AND receiver = :other_user)
+           OR (sender = :other_user AND receiver = :current_user)
+        ORDER BY text_date;
+    """), {'current_user': current_user, 'other_user': other_user}).fetchall()
+
+    return render_template('conversation.html', messages=messages, other_user=other_user)
+				
 
 if __name__ == "__main__":
 	import click
