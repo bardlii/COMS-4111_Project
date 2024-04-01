@@ -329,7 +329,7 @@ def feed():
             INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
             VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
         """, {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
-		).fetchall()
+		)
 	posts = text("""
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
         FROM Connect AS C
@@ -349,7 +349,7 @@ def for_you():
         g.conn.execute("""
             INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
             VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
-        """, {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
+        	""", {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
         )
     page = text("""
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
@@ -385,20 +385,33 @@ def for_you():
     return render_template('for_you.html', page_out=page_out)
 
 @app.route('/conversation_with', methods=['GET','POST'])
-def conversation(other_user):
-    current_user = session.get('user_id')
-    if current_user is None:
+def conversation(username):
+    user_id = session.get('user_id')
+    if user_id is None:
         return redirect(url_for('login'))
     
     messages = g.conn.execute(text("""
         SELECT sender, receiver, text, text_date
         FROM messages
-        WHERE (sender = :current_user AND receiver = :other_user)
-           OR (sender = :other_user AND receiver = :current_user)
+        WHERE ((sender = :current_user AND receiver = :other_user)
+            OR (sender = :other_user AND receiver = :current_user))
+            AND EXISTS (
+                SELECT 1
+                FROM connections
+                WHERE (user_id1 = :current_user AND user_id2 = :other_user)
+                    OR (user_id1 = :other_user AND user_id2 = :current_user)
+            )
         ORDER BY text_date;
-    """), {'current_user': current_user, 'other_user': other_user}).fetchall()
+    """), {'current_user': user_id, 'other_user': username}).fetchall()
+    if request.method == 'POST':
+        message = request.form['message']
+        g.conn.execute("""
+			INSERT INTO message (sender, receiver, text, text_date)
+            VALUES (:user_id, :username, :message, :date)
+			""", {"user_id": user_id, "username": username, "message": message, "date": date.today()}
+            ).fetchall()
 
-    return render_template('conversation.html', messages=messages, other_user=other_user)
+    return render_template('conversation.html', messages=messages, other_user=username)
 				
 
 if __name__ == "__main__":
