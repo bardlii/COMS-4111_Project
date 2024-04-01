@@ -313,23 +313,71 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-@app.route('/feed')
+@app.route('/feed', methods=['GET', 'POST'])
 def feed():
+	user_id = session.get('user_id')
+	if request.method == 'POST':
+		reaction = request.form['reaction']
+		comment = request.form['comment']
+		g.conn.execute("""
+            INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
+            VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
+        """, {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
+		).fetchall()
 	posts = text("""
-		SELECT user_id, post_number, creation_date, image_url, text
-		FROM post p
-		ORDER BY creation_date DESC
-	"""
-	)
-	reactions = text("""
-		SELECT reaction, comment
-		FROM post_interaction pi
-	""")
-	post_out = g.conn.execute(posts).fetchall()
-	reactions_out = g.conn.execute(reactions).fetchall()
-	return render_template('feed.html')
-		
+        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
+        FROM Connect AS C
+        JOIN POST AS P ON C.User_id2 = P.User_id
+        LEFT JOIN POST_INTERACTION AS PI ON P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number
+        WHERE C.User_id1 = :user_id
+    """)
+	post_out = g.conn.execute(posts, {"person_user_id": user_id}).fetchall()
+	return render_template('feed.html', user_feed=post_out)
 
+@app.route('/for_you', methods=['GET','POST'])
+def for_you():
+    user_id = session.get('user_id')
+    if request.method == 'POST':
+        reaction = request.form['reaction']
+        comment = request.form['comment']
+        g.conn.execute("""
+            INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
+            VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
+        """, {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
+        )
+    page = text("""
+        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
+        FROM POST AS P
+        LEFT JOIN POST_INTERACTION AS PI ON P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number
+        WHERE P.User_id IN (
+            SELECT U.User_id
+            FROM USERS AS U
+            JOIN PERSONAL_PROFILE AS PP ON U.User_id = PP.User_id
+            WHERE PP.Location = (
+                SELECT Location
+                FROM PERSONAL_PROFILE
+                WHERE User_id = :user_id
+            )
+            OR PP.Position = (
+                SELECT Position
+                FROM PERSONAL_PROFILE
+                WHERE User_id = :user_id
+            )
+            OR U.User_id IN (
+                SELECT User_id
+                FROM COMPANY
+                WHERE Field = (
+                    SELECT Field
+                    FROM COMPANY
+                    WHERE User_id = :user_id
+                )
+            )
+        )
+        ORDER BY P.Creation_date DESC;
+    """)
+    page_out = g.conn.execute(page, {"user_id": user_id}).fetchall()
+    return render_template('for_you.html', page_out=page_out)
+		
 
 if __name__ == "__main__":
 	import click
