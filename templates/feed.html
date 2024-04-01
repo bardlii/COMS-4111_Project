@@ -11,18 +11,23 @@
   <div class="feed">
     {% for post in user_feed %}
       <div class="post">
-        <p>Posted by {{ post['user_id'] }} on {{ post['creation_date'] }}</p>
-        <p>{{ post['image_url'] }}</p>
-        <p>{{ post['text'] }}</p>
+        <p>Posted by {{ post['Post_owner_id'] }} on {{ post['Post_creation_date'] }}</p>
+        <img src="{{ post['Post_image_url'] }}" alt="Post Image">
+        <p>{{ post['Post_text'] }}</p>
 
         <h4>Reactions:</h4>
         <ul>
-          {% for reaction in post_interaction['reaction'] %}
-            <li>{{ post_interaction['reacting_user_id'] }} reacted with {{ post_interaction['reaction'] }}</li>
+          {% for reaction in post_interaction %}
+            {% if reaction['Post_owner_id'] == post['Post_owner_id'] and reaction['Post_number'] == post['Post_number'] %}
+              <li>{{ reaction['Reacting_user_id'] }} reacted with {{ reaction['Reaction'] }}</li>
+              <li>Comment: {{ reaction['Comment'] }}</li>
+            {% endif %}
           {% endfor %}
         </ul>
 
-        <form method="post" action="{{ url_for('add_reaction', post_id=post.id) }}">
+        <form method="post" action="{{ url_for('feed') }}">
+          <input type="hidden" name="post_id" value="{{ post['Post_number'] }}">
+          <input type="hidden" name="post_owner_id" value="{{ post['Post_owner_id'] }}">
           <label for="reaction">Reaction:</label>
           <input type="text" name="reaction" id="reaction" required>
           <label for="comment">Comment:</label>
@@ -33,6 +38,5 @@
     {% endfor %}
   </div>
 {% endblock %}
-
 
 </html>
