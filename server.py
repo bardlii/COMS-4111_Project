@@ -332,20 +332,28 @@ def feed():
     if request.method == 'POST':
         reaction = request.form['reaction']
         comment = request.form['comment']
-        reaction_out = g.conn.execute(text("""
+        # Insert reaction and comment into the database
+        g.conn.execute(text("""
             INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
             VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
-        """), {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
-        )
-    posts = text("""
+        """), {
+            "reaction": reaction,
+            "comment": comment,
+            "post_owner_id": request.form['post_owner_id'],
+            "post_number": request.form['post_id'],
+            "reacting_user_id": user_id
+        })
+    
+    posts_query = text("""  
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text
         FROM Connect AS C
         JOIN POST AS P ON (C.User_id2 = P.User_id AND C.Connection_status = 'Connected')
         WHERE C.User_id1 = :user_id
     """)
-    post_out = g.conn.execute(posts, {"user_id": user_id}).fetchall()
-    #return render_template('feed.html', author=post_out['Post_owner_id'], date=post_out['Post_creation_date'], image=post_out['Post_image_url'], text=post_out['Post_text'])
-    return render_template('feed.html', post_out=post_out)
+    post_out_raw = g.conn.execute(posts_query, {"user_id": user_id}).fetchall()
+    post_out = [dict(row) for row in post_out_raw]
+    print(post_out)
+    return render_template('feed.html', posts=post_out)
 
 @app.route('/for_you', methods=['GET','POST'])
 def for_you():
@@ -444,6 +452,6 @@ if __name__ == "__main__":
 
 		HOST, PORT = host, port
 		print("running on %s:%d" % (HOST, PORT))
-		app.run(host=HOST, port=PORT, debug=debug, threaded=threaded)
+		app.run(host=HOST, port=PORT, debug=True, threaded=threaded)
 
 run()

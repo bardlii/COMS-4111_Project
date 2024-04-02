@@ -5,8 +5,8 @@
   <h1>LoopedIn</h1>
   
   <ul>
-    {% if g.user %}
-      <li><span>{{ g.user['name'] }}</span>
+    {% if g.user_id %}
+      <li><span>{{ g.user_id['name'] }}</span>
       <li><a href="{{ url_for('logout') }}">Log Out</a>
         <li><a href="{{ url_for('announce') }}">Create Announcement</a>
           <li><a href="{{ url_for('event') }}">Create Event</a>

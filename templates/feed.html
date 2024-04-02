@@ -8,18 +8,17 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Feed</h1>
     <div class="feed">
-        {% for post in post_out %}
+        {% for post in posts %}
             <div class="post">
-                <p>Posted by {{ post['Post_owner_id'] }} on {{ post['Post_creation_date'] }}</p>
-                <img src="{{ post['Post_image_url'] }}" alt="Post Image">
+                <p>Posted by {{ post['post_owner_id'] }} on {{ post['post_creation_date'] }}</p>
+                <img src="{{ post['post_image_url'] }}" alt="Post Image">
                 <h2>Post Content</h2>
-                <p><strong>User ID:</strong> {{ post['Post_owner_id'] }}</p>
-                <p><strong>Post Text:</strong> {{ post['Text'] }}</p>
-                <p><strong>Post Image:</strong> {{ post['Post_image_url'] }}</p>
-            
+                <p><strong>User ID:</strong> {{ post['post_owner_id'] }}</p>
+                <p><strong>Post Text:</strong> {{ post['post_text'] }}</p>
+                <p><strong>Post Image:</strong> {{ post['post_image_url'] }}</p>
             </div>
         {% endfor %}
+    </div>
 {% endblock %}
 </html>
