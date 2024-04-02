@@ -9,13 +9,13 @@
 
 {% block content %}
   <div class="feed">
-    {% for post in user_feed %}
+    {% for post in post_out %}
       <div class="post">
-        <p>Posted by {{ author }} on {{ date }}</p>
-        <p>{{ image }}</p>
-        <p>{{ text }}</p>
+        <p>Posted by {{ post.Post_owner_id }} on {{ post.Post_creation_date }}</p>
+        <img src="{{ post.Post_image_url }}" alt="Post Image">
+        <p>{{ post.Post_text }}</p>
 
-        <form method="post" action="{{ url_for('add_reaction', post_id=post.id) }}">
+
           <label for="reaction">Reaction:</label>
           <input type="text" name="reaction" id="reaction" required>
           <label for="comment">Comment:</label>
@@ -26,6 +26,4 @@
     {% endfor %}
   </div>
 {% endblock %}
-
-
 </html>
