@@ -8,32 +8,17 @@
 {% endblock %}
 
 {% block content %}
-  <div class="feed">
-    {% for post in page_out %}
-      <div class="post">
-        <h3>{{ post['post_owner_id'] }}</h3>
-        <p>Posted by {{ post['post_owner_id'] }} on {{ post['post_creation_date'] }}</p>
-        <img src="{{ post['post_image_url'] }}" alt="Post Image">
-        <p>{{ post['post_text'] }}</p>
-        
-        <h4>Reactions:</h4>
-        <ul>
-          {% for reaction in post['reaction'] %}
-            <li>{{ reaction['reacting_user_id'] }} reacted with {{ reaction['reaction'] }}</li>
-            <li>Comment: {{ reaction['comment'] }}</li>
-          {% endfor %}
-        </ul>
-
-        <form method="post" action="{{ url_for('add_reaction', post_id=post['post_number']) }}">
-          <label for="reaction">Reaction:</label>
-          <input type="text" name="reaction" id="reaction" required>
-          <label for="comment">Comment:</label>
-          <input type="text" name="comment" id="comment">
-          <input type="hidden" name="post_owner_id" value="{{ post['post_owner_id'] }}">
-          <input type="hidden" name="post_id" value="{{ post['post_number'] }}">
-          <input type="submit" value="React">
-        </form>
-      </div>
-    {% endfor %}
-  </div>
+    <div class="for you">
+        {% for post in page_out %}
+            <div class="post">
+                <p>Posted by {{ post['post_owner_id'] }} on {{ post['post_creation_date'] }}</p>
+                <img src="{{ post['post_image_url'] }}" alt="Post Image">
+                <h2>Post Content</h2>
+                <p><strong>User ID:</strong> {{ post['post_owner_id'] }}</p>
+                <p><strong>Post Text:</strong> {{ post['post_text'] }}</p>
+                <p><strong>Post Image:</strong> {{ post['post_image_url'] }}</p>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
+</html>

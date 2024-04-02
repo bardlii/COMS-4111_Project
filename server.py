@@ -66,19 +66,29 @@ with engine.connect() as conn:
 
 @app.before_request
 def before_request():
-	"""
-	This function is run at the beginning of every web request
-	(every time you enter an address in the web browser).
-	We use it to setup a database connection that can be used throughout the request.
+    """
+    This function is run at the beginning of every web request
+    (every time you enter an address in the web browser).
+    We use it to setup a database connection that can be used throughout the request.
 
-	The variable g is globally accessible.
-	"""
-	try:
-		g.conn = engine.connect()
-	except:
-		print("uh oh, problem connecting to database")
-		import traceback; traceback.print_exc()
-		g.conn = None
+    The variable g is globally accessible.
+    """
+    try:
+        g.conn = engine.connect()
+    except:
+        print("uh oh, problem connecting to database")
+        import traceback
+        traceback.print_exc()
+        g.conn = None
+
+    # Load the logged-in user's ID
+    load_logged_in_user()
+
+def load_logged_in_user():
+    user_id = session.get('user_id')
+    g.user_id = user_id
+    print(g.user_id)
+
 
 @app.teardown_request
 def teardown_request(exception):
@@ -198,7 +208,7 @@ def add():
 #def login():
 	#based on user_id
 	#user_id = request.form['user_id']
-user_id = ""
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
@@ -259,7 +269,7 @@ def user_profile(username):
 
         return render_template('company_profile.html', user_name=company_profile['Name'], user_id=company_profile['User_id'], location=company_profile['Location'], bio=company_profile['Bio'], image=company_profile['Image_URL'], job_listings=job_listings)
 
-@app.route('/event', methods=['POST'])
+@app.route('/create_event', methods=['GET','POST'])
 def create_event():
     if request.method == 'POST':
         user_id = session.get('user_id')
@@ -291,7 +301,7 @@ def create_event():
       
     return render_template('event.html')
 
-@app.route('/announce', methods=['POST'])
+@app.route('/announce', methods=['GET','POST'])
 def announce():
     if request.method == 'POST':
         user_id = session.get('user_id')

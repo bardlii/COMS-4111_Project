@@ -9,7 +9,7 @@
       <li><span>{{ g.user_id['name'] }}</span>
       <li><a href="{{ url_for('logout') }}">Log Out</a>
         <li><a href="{{ url_for('announce') }}">Create Announcement</a>
-          <li><a href="{{ url_for('event') }}">Create Event</a>
+          <li><a href="{{ url_for('create_event') }}">Create Event</a>
             <li><a href="{{ url_for('feed') }}">Feed</a>
               <li><a href="{{ url_for('for_you') }}">For You</a>
     {% else %}
