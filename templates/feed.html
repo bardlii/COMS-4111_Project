@@ -11,10 +11,9 @@
   <div class="feed">
     {% for post in user_feed %}
       <div class="post">
-        <h3>{{ post.title }}</h3>
-        <p>Posted by {{ post.author }} on {{ post.date }}</p>
-        <p>{{ post.image }}</p>
-        <p>{{ post.text }}</p>
+        <p>Posted by {{ author }} on {{ date }}</p>
+        <p>{{ image }}</p>
+        <p>{{ text }}</p>
 
         <form method="post" action="{{ url_for('add_reaction', post_id=post.id) }}">
           <label for="reaction">Reaction:</label>
