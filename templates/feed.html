@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-{% extends 'base.html' %}
-
-{% block title %}Feed{% endblock %}
-
-{% block header %}
-  <h1>Feed</h1>
-{% endblock %}
-
-{% block content %}
-  <div class="feed">
-    {% for post in post_out %}
-      <div class="post">
-        <p>Posted by {{ post.Post_owner_id }} on {{ post.Post_creation_date }}</p>
-        <img src="{{ post.Post_image_url }}" alt="Post Image">
-        <p>{{ post.Post_text }}</p>
-
-
-          <label for="reaction">Reaction:</label>
-          <input type="text" name="reaction" id="reaction" required>
-          <label for="comment">Comment:</label>
-          <input type="text" name="comment" id="comment">
-          <input type="submit" value="React">
-        </form>
-      </div>
-    {% endfor %}
-  </div>
-{% endblock %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Feed</h1>
+    <div class="feed">
+        {% for post in post_out %}
+            <div class="post">
+                <p>Posted by {{ post['Post_owner_id'] }} on {{ post['Post_creation_date'] }}</p>
+                <img src="{{ post['Post_image_url'] }}" alt="Post Image">
+                <h2>Post Content</h2>
+                <p><strong>User ID:</strong> {{ post['Post_owner_id'] }}</p>
+                <p><strong>Post Text:</strong> {{ post['Text'] }}</p>
+                <p><strong>Post Image:</strong> {{ post['Post_image_url'] }}</p>
+            
+            </div>
+        {% endfor %}
+    </div>
+</body>
 </html>
