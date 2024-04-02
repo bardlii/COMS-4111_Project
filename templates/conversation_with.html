@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversation</title>
-    <style>
-        /* Add your CSS styles here */
-    </style>
-</head>
-<body>      
+{% extends 'base.html' %}
+
+{% block title %}Conversation{% endblock %}
+
+{% block content %}
     <h1>Conversation with {{ other_user }}</h1>
     <div>
         {% for message in messages %}
-            {% if messages['sender']== current_user %}
+            {% if message.sender == current_user %}
                 <div style="text-align: right;">
                     <p>{{ message.text }}</p>
-                    <small>{{ message['text_date'] }}</small>
+                    <small>{{ message.text_date }}</small>
                 </div>
             {% else %}
                 <div>
-                    <p>{{ messages['text'] }}</p>
-                    <small>{{ message['text_date'] }}</small>
+                    <p>{{ message.text }}</p>
+                    <small>{{ message.text_date }}</small>
                 </div>
             {% endif %}
         {% endfor %}
@@ -30,5 +24,4 @@
         <textarea name="text" placeholder="Type your message here..." required></textarea>
         <button type="submit">Send</button>
     </form>
-</body>
-</html>
+{% endblock %}

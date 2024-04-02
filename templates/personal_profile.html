@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ pp['user_id'] }}'s Profile</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file here -->
-</head>
-<body>
-    <h1>{{ pp['user_id'] }}'s Profile</h1>
+{% extends 'base.html' %}
+
+{% block title %}Create Event{% endblock %}
+
+{% block header %}
+<h1>{{ pp['user_id'] }}'s Profile</h1>
+{% endblock %}
+
+{% block content %}
     <div class="profile-info">
         <h2>User Information</h2>
         <p><strong>User ID:</strong> {{ pp['user_id'] }}</p>
@@ -24,7 +24,6 @@
     <div class="user-posts">
         <h2>User Posts</h2>
         {% if posts %}
-            <ul>
                 {% for post in posts %}
                     <div class="post">
                         <p>Posted on {{ post['creation_date'] }}</p>
@@ -34,13 +33,32 @@
                         <p><strong>Post Image:</strong> {{ post['image_url'] }}</p>
                     </div>
                 {% endfor %}
-            </ul>
         {% else %}
             <p>No posts found.</p>
         {% endif %}
     </div>
+<button class="connect-btn" data-username="{{ pp['user_id'] }}" style="font-size: 35px;">MESSAGE</button>
+<script>
+    // Add event listener to the message button
+    document.querySelector('.connect-btn').addEventListener('click', function() {
+        // Extract the username from the data attribute
+        const username = this.dataset.username;
+        // Make a GET request to the conversation_with route with the username as a query parameter
+        fetch(`/conversation_with?username=${username}`)
+            .then(response => {
+                // Check if the response status is OK
+                if (response.ok) {
+                    // Redirect to the conversation_with page
+                    window.location.href = response.url;
+                } else {
+                    // Handle error
+                    console.error('Error:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
 
-    <a href="{{ url_for('conversation_with', username=user_id) }}">Message User</a>
 
-</body>
+{% endblock %}
 </html>

@@ -272,7 +272,7 @@ def user_profile():
 def groups():
     if request.method == 'GET':
         # Fetch all groups
-        groups = g.conn.execute("SELECT * FROM GROUPS").fetchall()
+        groups = g.conn.execute(text("SELECT * FROM GROUPS")).fetchall()
         return render_template('groups.html', groups=groups)
     
     elif request.method == 'POST':
@@ -282,24 +282,19 @@ def groups():
 
         if action == 'join':
             # Insert into GROUP_MEMBERS table
-            g.conn.execute("INSERT INTO GROUP_MEMBERS (Group_id, User_id) VALUES (?, ?)", (group_id, user_id))
+            g.conn.execute(text("INSERT INTO GROUP_MEMBERS (Group_id, User_id) VALUES (?, ?)"), (group_id, user_id))
 
             # Update Number_of_members in GROUPS table
-            g.conn.execute("UPDATE GROUPS SET Number_of_members = Number_of_members + 1 WHERE Group_id = ?", (group_id,))
+            g.conn.execute(text("UPDATE GROUPS SET Number_of_members = Number_of_members + 1 WHERE Group_id = ?"), (group_id,))
             
         elif action == 'leave':
             # Remove from GROUP_MEMBERS table
-            g.conn.execute("DELETE FROM GROUP_MEMBERS WHERE Group_id = ? AND User_id = ?", (group_id, user_id))
+            g.conn.execute(text("DELETE FROM GROUP_MEMBERS WHERE Group_id = ? AND User_id = ?"), (group_id, user_id))
 
             # Update Number_of_members in GROUPS table
-            g.conn.execute("UPDATE GROUPS SET Number_of_members = Number_of_members - 1 WHERE Group_id = ?", (group_id,))
+            g.conn.execute(text("UPDATE GROUPS SET Number_of_members = Number_of_members - 1 WHERE Group_id = ?"), (group_id,))
         
         return redirect(url_for('groups'))
-
-
-
-
-
 
 
 @app.route('/create_event', methods=['GET','POST'])
@@ -330,9 +325,9 @@ def create_event():
             flash(f'An error occurred: {error}', 'error')
 
         return redirect(url_for('index'))
-
       
     return render_template('event.html')
+
 
 @app.route('/announce', methods=['GET','POST'])
 def announce():
@@ -369,6 +364,7 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
+
 @app.route('/feed', methods=['GET', 'POST'])
 def feed():
     user_id = session.get('user_id')
@@ -388,15 +384,18 @@ def feed():
         })
     
     posts_query = text("""  
-        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text
+        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
         FROM Connect AS C
         JOIN POST AS P ON (C.User_id2 = P.User_id AND C.Connection_status = 'Connected')
+        LEFT JOIN post_interaction AS PI ON (P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number)
         WHERE C.User_id1 = :user_id
     """)
     post_out_raw = g.conn.execute(posts_query, {"user_id": user_id}).fetchall()
     post_out = [dict(row) for row in post_out_raw]
     print(post_out)
+
     return render_template('feed.html', posts=post_out)
+
 
 @app.route('/for_you', methods=['GET','POST'])
 def for_you():
@@ -437,25 +436,79 @@ def for_you():
                 )
             )
         )
-        ORDER BY P.Creation_date DESC;
+        ORDER BY P.Creation_date DESC
     """)
     page_out = g.conn.execute(page, {"user_id": user_id}).fetchall()
     return render_template('for_you.html', page_out=page_out)
 
+
+@app.route('/explore', methods=['GET','POST'])
+def search():
+    if request.method == 'POST':
+        u_search = request.form['u_search']
+        l_search = request.form['l_search']
+        p_search = request.form['p_search']
+        if u_search:
+            u_results = g.conn.execute(text("""
+                SELECT user_id, name
+                FROM users AS U
+                WHERE name LIKE '%' || :keyword || '%' OR user_id LIKE '%' || :keyword || '%'
+                """), {"keyword": u_search}
+            ).fetchall()
+            return render_template('search.html', u_results=u_results)
+        elif l_search:
+            l_results = g.conn.execute(text("""
+                SELECT u.name, u.user_id
+                FROM users u
+                LEFT JOIN personal_profile pp ON u.user_id = pp.user_id
+                LEFT JOIN company_locations cl ON u.user_id = cl.user_id
+                WHERE u.name LIKE '%' || :keyword || '%' OR pp.location LIKE '%' || :keyword || '%' OR cl.location LIKE '%' || :keyword || '%'
+                """), {"keyword": l_search}
+            ).fetchall()
+            return render_template('search.html', l_results=l_results)
+        elif p_search:
+            p_results = g.conn.execute(text("""
+                SELECT user_id, name
+                FROM users AS U
+                WHERE name LIKE '%' || :u_search || '%' OR user_id LIKE '%' || :u_search || '%'
+                """), {"u_search": u_search}
+            ).fetchall()
+            return render_template('search.html', p_results=p_results)
+        
+    return render_template('search.html')
+
+@app.route('/search_results', methods=['GET'])
+def show_results():
+    results = request.args.get('results')
+    no_results = request.args.get('no_results')
+
+    if results:
+        # Parse the JSON results and pass them to the template
+        results = json.loads(results)
+        return render_template('search_results.html', results=results)
+    elif no_results:
+        # If no results were found, render the template with a message
+        return render_template('search_results.html', no_results=True)
+    else:
+        # If no query parameters are present, redirect to the explore page
+        return redirect(url_for('explore'))        
+
+
 @app.route('/conversation_with', methods=['GET','POST'])
-def conversation(username):
+def conversation():
+    username = request.args.get('username')
     user_id = session.get('user_id')
     if user_id is None:
         return redirect(url_for('login'))
     
     messages = g.conn.execute(text("""
         SELECT sender, receiver, text, text_date
-        FROM messages
+        FROM message
         WHERE ((sender = :current_user AND receiver = :other_user)
             OR (sender = :other_user AND receiver = :current_user))
             AND EXISTS (
                 SELECT 1
-                FROM connections
+                FROM connect
                 WHERE (user_id1 = :current_user AND user_id2 = :other_user)
                     OR (user_id1 = :other_user AND user_id2 = :current_user)
             )
@@ -469,7 +522,7 @@ def conversation(username):
 			"""), {"user_id": user_id, "username": username, "message": message, "date": date.today()}
             ).fetchall()
 
-    return render_template('conversation.html', messages=messages, other_user=username)
+    return render_template('conversation_with.html', messages=messages, other_user=username)
 				
 
 if __name__ == "__main__":

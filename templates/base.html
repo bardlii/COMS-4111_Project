@@ -7,11 +7,13 @@
   <ul>
     {% if g.user_id %}
       <li><span>{{ g.user_id['name'] }}</span>
-      <li><a href="{{ url_for('logout') }}">Log Out</a>
+      <li><a href="{{ url_for('search') }}">Explore</a>
         <li><a href="{{ url_for('announce') }}">Create Announcement</a>
           <li><a href="{{ url_for('create_event') }}">Create Event</a>
             <li><a href="{{ url_for('feed') }}">Feed</a>
               <li><a href="{{ url_for('for_you') }}">For You</a>
+                <li><a href="{{ url_for('groups') }}">Groups</a>
+                  <li><a href="{{ url_for('logout') }}">Log Out</a>
     {% else %}
       
       <li><a href="{{ url_for('login') }}">Log In</a>

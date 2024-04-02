@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col">
+                <h1>Search Results</h1>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col">
+                {% if results %}
+                    <h2>Results</h2>
+                    <ul>
+                        {% for result in results %}
+                            <li>{{ result.name }} - {{ result.description }}</li>
+                        {% endfor %}
+                    </ul>
+                {% elif no_results %}
+                    <p>No results found.</p>
+                {% else %}
+                    <p>No query parameters provided.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

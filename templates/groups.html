@@ -3,31 +3,15 @@
 {% block title %}Groups{% endblock %}
 
 {% block content %}
-    <h1>Groups:</h1>
-    <div>
-        <ul>
-            {% for group in groups %}
-                <li>
-                    <strong>Group ID:</strong> {{ group.Group_id }}<br>
-                    <strong>Number of Members:</strong> {{ group.Number_of_members }}<br>
-                    <strong>Privacy Status:</strong> {{ group.Privacy_status }}<br>
-                    <strong>Description:</strong> {{ group.Description }}<br>
-                    <strong>Image URL:</strong> {{ group.Image_URL }}<br>
-                    <strong>Location:</strong> {{ group.Location }}
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
     <div>
         <h2>Join a Group</h2>
         <form action="/groups" method="post">
             <input type="hidden" name="action" value="join">
-            <label for="group_name">Enter the group ID of the group you would like to join. NOTE! You cannot join a private group:</label>
+            <label for="group_name">Enter the group ID of the group you would like to join:</label>
             <input type="text" id="group_name" name="group_id" placeholder="Enter group ID" required>
             <button type="submit">Join</button>
         </form>
     </div>
-
     <div>
         <h2>Leave a Group</h2>
         <form action="/groups" method="post">
@@ -36,5 +20,19 @@
             <input type="text" id="group_name" name="group_id" placeholder="Enter group ID" required>
             <button type="submit">Leave</button>
         </form>
+    </div>
+    <div>
+        <h1>Groups:</h1>
+        <ul>
+            {% for group in groups %}
+                <li>
+                    <strong>Group ID:</strong> {{ group['group_id'] }}<br>
+                    <strong>Number of Members:</strong> {{ group['number_of_members'] }}<br>
+                    <strong>Description:</strong> {{ group['description'] }}<br>
+                    <strong>Image URL:</strong> {{ group['image_url'] }}<br>
+                    <strong>Location:</strong> {{ group['location'] }}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 {% endblock %}
