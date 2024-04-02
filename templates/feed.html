@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feed</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Feed{% endblock %}
+
+{% block header %}
+  <h1>Feed</h1>
+{% endblock %}
+
+{% block content %}
     <h1>Feed</h1>
     <div class="feed">
         {% for post in post_out %}
@@ -20,6 +21,5 @@
             
             </div>
         {% endfor %}
-    </div>
-</body>
+{% endblock %}
 </html>
