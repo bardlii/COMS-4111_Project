@@ -267,6 +267,41 @@ def user_profile():
 
         return render_template('company_profile.html', user_name=company_profile['Name'], user_id=company_profile['User_id'], location=company_profile['Location'], bio=company_profile['Bio'], image=company_profile['Image_URL'], job_listings=job_listings)
 
+
+@app.route('/groups', methods=['GET', 'POST'])
+def groups():
+    if request.method == 'GET':
+        # Fetch all groups
+        groups = g.conn.execute("SELECT * FROM GROUPS").fetchall()
+        return render_template('groups.html', groups=groups)
+    
+    elif request.method == 'POST':
+        action = request.form.get('action')
+        group_id = request.form.get('group_id')
+        user_id = session.get('user_id')
+
+        if action == 'join':
+            # Insert into GROUP_MEMBERS table
+            g.conn.execute("INSERT INTO GROUP_MEMBERS (Group_id, User_id) VALUES (?, ?)", (group_id, user_id))
+
+            # Update Number_of_members in GROUPS table
+            g.conn.execute("UPDATE GROUPS SET Number_of_members = Number_of_members + 1 WHERE Group_id = ?", (group_id,))
+            
+        elif action == 'leave':
+            # Remove from GROUP_MEMBERS table
+            g.conn.execute("DELETE FROM GROUP_MEMBERS WHERE Group_id = ? AND User_id = ?", (group_id, user_id))
+
+            # Update Number_of_members in GROUPS table
+            g.conn.execute("UPDATE GROUPS SET Number_of_members = Number_of_members - 1 WHERE Group_id = ?", (group_id,))
+        
+        return redirect(url_for('groups'))
+
+
+
+
+
+
+
 @app.route('/create_event', methods=['GET','POST'])
 def create_event():
     if request.method == 'POST':
