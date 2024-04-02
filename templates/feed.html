@@ -13,14 +13,8 @@
       <div class="post">
         <h3>{{ post.title }}</h3>
         <p>Posted by {{ post.author }} on {{ post.date }}</p>
-        <p>{{ post.content }}</p>
-
-        <h4>Reactions:</h4>
-        <ul>
-          {% for reaction in post.reactions %}
-            <li>{{ reaction.user }} reacted with {{ reaction.reaction }}</li>
-          {% endfor %}
-        </ul>
+        <p>{{ post.image }}</p>
+        <p>{{ post.text }}</p>
 
         <form method="post" action="{{ url_for('add_reaction', post_id=post.id) }}">
           <label for="reaction">Reaction:</label>

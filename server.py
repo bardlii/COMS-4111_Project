@@ -344,9 +344,7 @@ def feed():
         WHERE C.User_id1 = :user_id
     """)
     post_out = g.conn.execute(posts, {"user_id": user_id}).fetchall()
-    user_feed = [dict(row) for row in post_out]
-	#return render_template('feed.html', post['Post_owner_id']=post_out['Post_owner_id'])
-    return render_template('feed.html', user_feed=user_feed)
+    return render_template('feed.html', post.author=post_out['Post_owner_id'], post.date=post_out['Post_creation_date'], post.image=post_out['Post_image_url'], post.text=post_out['Post_text'])
 
 @app.route('/for_you', methods=['GET','POST'])
 def for_you():
