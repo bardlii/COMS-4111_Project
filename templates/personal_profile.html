@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user_name }}'s Profile</title>
+    <title>{{ pp['user_id'] }}'s Profile</title>
     <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file here -->
 </head>
 <body>
-    <h1>{{ user_name }}'s Profile</h1>
+    <h1>{{ pp['user_id'] }}'s Profile</h1>
     <div class="profile-info">
         <h2>User Information</h2>
-        <p><strong>User ID:</strong> {{ user_id }}</p>
-        <p><strong>Education:</strong> {{ education }}</p>
-        <p><strong>Bio:</strong> {{ bio }}</p>
-        <p><strong>Image:</strong> {{ image }}</p>
-        <p><strong>Employment Status:</strong> {{ employment_status }}</p>
-        <p><strong>Date of Birth:</strong> {{ date_of_birth }}</p>
-        <p><strong>Location:</strong> {{ location }}</p>
-        <p><strong>Position:</strong> {{ position }}</p>
-        <p><strong>Position Seeking:</strong> {{ position_seeking }}</p>
+        <p><strong>User ID:</strong> {{ pp['user_id'] }}</p>
+        <p><strong>Education:</strong> {{ pp['education'] }}</p>
+        <p><strong>Bio:</strong> {{ pp['bio'] }}</p>
+        <p><strong>Image:</strong> {{ pp['image_url'] }}</p>
+        <p><strong>Employment Status:</strong> {{ pp['employment_status'] }}</p>
+        <p><strong>Date of Birth:</strong> {{ pp['date_of_birth'] }}</p>
+        <p><strong>Location:</strong> {{ pp['location'] }}</p>
+        <p><strong>Position:</strong> {{ pp['position'] }}</p>
+        <p><strong>Position Seeking:</strong> {{ pp['position_seeking'] }}</p>
     </div>
 
     <div class="user-posts">
@@ -26,7 +26,13 @@
         {% if posts %}
             <ul>
                 {% for post in posts %}
-                    <li>{{ post.content }} - {{ post.date }}</li>
+                    <div class="post">
+                        <p>Posted on {{ post['creation_date'] }}</p>
+                        <img src="{{ post['image_url'] }}" alt="Post Image">
+                        <h2>Post Content</h2>
+                        <p><strong>Post Text:</strong> {{ post['text'] }}</p>
+                        <p><strong>Post Image:</strong> {{ post['image_url'] }}</p>
+                    </div>
                 {% endfor %}
             </ul>
         {% else %}

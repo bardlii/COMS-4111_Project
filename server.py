@@ -233,14 +233,12 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/login/<username>')
-def user_profile(username):
+@app.route('/viewprofile', methods=['GET'])
+def user_profile():
+    # Retrieve the username from the query parameters
+    username = request.args.get('username')
+    #username = request.get('usenname')
     # Check if the user is a personal profile
-    confirm = text(
-        "SELECT * FROM personal_profile WHERE user_id = :username"
-	)
-    #confirm = confirm.bindparams(user_id='jd001')
-    #personal_profile = g.conn.execute(confirm, user_id='jd001').fetchone()
     personal_profile = g.conn.execute(
        text("SELECT * FROM personal_profile WHERE user_id = :username"), {"username": username}
     ).fetchone()
@@ -250,7 +248,7 @@ def user_profile(username):
         posts = g.conn.execute(
             text("SELECT * FROM post WHERE user_id = :username"), {"username": username}
         ).fetchall()
-        return render_template('personal_profile.html', user_name=personal_profile['Name'], user_id=personal_profile['User_id'], education=personal_profile['Education'], bio=personal_profile['Bio'], image=personal_profile['Image_URL'], employment_status=personal_profile['Employment_status'], date_of_birth=personal_profile['Date_of_birth'], location=personal_profile['Location'], position=personal_profile['Position'], position_seeking=personal_profile['Position_seeking'])
+        return render_template('personal_profile.html', pp=personal_profile, posts=posts)
 
     # Check if the user is a company profile
     company_profile = g.conn.execute(
