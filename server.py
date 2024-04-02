@@ -328,24 +328,33 @@ def logout():
 
 @app.route('/feed', methods=['GET', 'POST'])
 def feed():
-	user_id = session.get('user_id')
-	if request.method == 'POST':
-		reaction = request.form['reaction']
-		comment = request.form['comment']
-		reaction_out = g.conn.execute(text("""
+    user_id = session.get('user_id')
+    if request.method == 'POST':
+        reaction = request.form['reaction']
+        comment = request.form['comment']
+        reaction_out = g.conn.execute(text("""
             INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
             VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
         """), {"reaction": reaction, "comment": comment, "post_owner_id": request.form['post_owner_id'], "post_number": request.form['post_id'], "reacting_user_id": user_id}
-		)
-	posts = text("""
-        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
+        )
+    posts = text("""
+        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text
         FROM Connect AS C
-        JOIN POST AS P ON C.User_id2 = P.User_id
-        LEFT JOIN POST_INTERACTION AS PI ON P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number
+        JOIN POST AS P ON (C.User_id2 = P.User_id AND C.Connection_status = 'Connected')
         WHERE C.User_id1 = :user_id
     """)
-	post_out = g.conn.execute(posts, {"user_id": user_id}).fetchall()
-#	return render_template('feed.html', p.user_id=post_out['Post_owner_id'], post_out['Post_creation_date'], post_out['Post_text'], reaction_out['Post_owner_id'], reaction_out['Post_number'], post_out['Post_number'], reaction_out['Reacting_user_id'], reaction_out['Reaction'], reaction_out['Comment']})
+    post_out = g.conn.execute(posts, {"user_id": user_id}).fetchall()
+    
+    # Prepare data for rendering
+    user_feed = [{
+        'Post_owner_id': column['Post_owner_id'],
+        'Post_number': column['Post_number'],
+        'Post_creation_date': column['Post_creation_date'],
+        'Post_image_url': column['Post_image_url'],
+        'Post_text': column['Post_text']
+    } for row in column]
+    
+    return render_template('feed.html', user_feed=user_feed)
 
 @app.route('/for_you', methods=['GET','POST'])
 def for_you():
