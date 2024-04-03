@@ -19,9 +19,9 @@
             {% endif %}
         {% endfor %}
     </div>
-    <form action="/send_message" method="post">
+    <form method="post">
         <input type="hidden" name="receiver" value="{{ other_user }}">
-        <textarea name="text" placeholder="Type your message here..." required></textarea>
+        <textarea name="message" placeholder="Type your message here..." required></textarea>
         <button type="submit">Send</button>
     </form>
 {% endblock %}

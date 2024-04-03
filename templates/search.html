@@ -13,51 +13,42 @@
             <div class="col">
                 <h2>Search Users</h2>
                 <input type="text" class="form-control form-control-lg" id="searchUsersInput" style="width: 100%;" placeholder="Search users...">
-                <button class="btn btn-primary mt-3 search-btn" id="searchUsersButton" data-search-type="users">Search</button>
+                <button class="search-btn" id="searchUsersButton" data-search-type="users">Search</button>
             </div>
         </div>
         <div class="row mt-4">
             <div class="col">
                 <h2>Search Location</h2>
                 <input type="text" class="form-control form-control-lg" id="searchLocationInput" style="width: 100%;" placeholder="Search location...">
-                <button class="btn btn-primary mt-3 search-btn" id="searchLocationButton" data-search-type="location">Search</button>
+                <button class="search-btn" id="searchLocationButton" data-search-type="location">Search</button>
             </div>
         </div>
         <div class="row mt-4">
             <div class="col">
                 <h2>Search Position</h2>
                 <input type="text" class="form-control form-control-lg" id="searchPositionInput" style="width: 100%;" placeholder="Search position...">
-                <button class="btn btn-primary mt-3 search-btn" id="searchPositionButton" data-search-type="position">Search</button>
+                <button class="search-btn" id="searchPositionButton" data-search-type="position">Search</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Function to handle search button click
-        function handleSearchButtonClick(searchType) {
-            const searchInputId = `search${searchType.charAt(0).toUpperCase() + searchType.slice(1)}Input`;
-            const userInput = document.getElementById(searchInputId).value;
-            fetch(`/search_${searchType}?keyword=${userInput}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        // Redirect to search results page with query parameters
-                        const queryString = new URLSearchParams({ results: JSON.stringify(data) }).toString();
-                        window.location.href = `/search_results.html?${queryString}`;
-                    } else {
-                        // Redirect to search results page with no results message
-                        window.location.href = '/search_results.html?no_results=true';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        // Add event listeners to all search buttons
         document.querySelectorAll('.search-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const searchType = this.dataset.searchType;
-                handleSearchButtonClick(searchType);
+                const searchInputId = `search${searchType.charAt(0).toUpperCase() + searchType.slice(1)}Input`;
+                const userInput = document.getElementById(searchInputId).value;
+                fetch(`/search_results?search_type=${searchType}&query=${userInput}`)
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = response.url;
+                        } else {
+                            console.error('Error:', response.statusText);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
             });
         });
     </script>
+    
 {% endblock %}

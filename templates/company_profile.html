@@ -1,29 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user_name }}'s Profile</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file here -->
-</head>
-<body>
-    <h1>{{ user_name }}'s Profile</h1>
+{% extends 'base.html' %}
+
+{% block title %}Company Profile{% endblock %}
+
+{% block header %}
+<h1>{{ u['name'] }}'s Profile</h1>
+{% endblock %}
+
+{% block content %}
     <div class="profile-info">
         <h2>User Information</h2>
-        <p><strong>User ID:</strong> {{ user_id }}</p>
-        <p><strong>Location:</strong> {{ location }}</p>
-        <p><strong>Bio:</strong> {{ bio }}</p>
-        <p><strong>Image:</strong> {{ image }}</p>
+        <p><strong>User ID:</strong> {{ cp['user_id'] }}</p>
+        <p><strong>Location:</strong> {{ cl['location'] }}</p>
+        <p><strong>Field:</strong> {{ cp['field'] }}</p>
+        <p><strong>Bio:</strong> {{ u['bio'] }}</p>
+        <p><strong>Image:</strong> {{ u['image_url'] }}</p>
     </div>
 
     <div class="user-posts">
         <h2>User Posts</h2>
         {% if posts %}
-            <ul>
                 {% for post in posts %}
-                    <li>{{ post.content }} - {{ post.date }}</li>
+                    <div class="post">
+                        <p>Posted on {{ post['creation_date'] }}</p>
+                        <img src="{{ post['image_url'] }}" alt="Post Image">
+                        <h2>Post Content</h2>
+                        <p><strong>Post Text:</strong> {{ post['text'] }}</p>
+                        <p><strong>Post Image:</strong> {{ post['image_url'] }}</p>
+                    </div>
                 {% endfor %}
-            </ul>
         {% else %}
             <p>No posts found.</p>
         {% endif %}
@@ -35,9 +40,9 @@
             <ul>
                 {% for job in job_listings %}
                     <li>
-                        <strong>Position:</strong> {{ job.position }}<br>
-                        <strong>Location:</strong> {{ job.location }}<br>
-                        <strong>Description:</strong> {{ job.description }}
+                        <strong>Position:</strong> {{ jl['position'] }}<br>
+                        <strong>Location:</strong> {{ jl['location'] }}<br>
+                        <strong>Description:</strong> {{ jl['description'] }}
                     </li>
                 {% endfor %}
             </ul>
@@ -45,8 +50,26 @@
             <p>No job listings found.</p>
         {% endif %}
     </div>
-
-    <a href="message.html?user_id={{ user_id }}">Message User</a>
-
-</body>
+    <button class="connect-btn" data-username="{{ cp['user_id'] }}" style="font-size: 35px;">MESSAGE</button>
+    <script>
+        // Add event listener to the message button
+        document.querySelector('.connect-btn').addEventListener('click', function() {
+            // Extract the username from the data attribute
+            const username = this.dataset.username;
+            // Make a GET request to the conversation_with route with the username as a query parameter
+            fetch(`/conversation_with?username=${username}`)
+                .then(response => {
+                    // Check if the response status is OK
+                    if (response.ok) {
+                        // Redirect to the conversation_with page
+                        window.location.href = response.url;
+                    } else {
+                        // Handle error
+                        console.error('Error:', response.statusText);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+{% endblock %}
 </html>

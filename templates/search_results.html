@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 {% extends 'base.html' %}
 
 {% block title %}Search Results{% endblock %}
@@ -15,15 +16,37 @@
                     <h2>Results</h2>
                     <ul>
                         {% for result in results %}
-                            <li>{{ result.name }} - {{ result.description }}</li>
+                            <li>{{ result.name }} - {{ result.user_id }}</li>
+                            <button class="view-profile-btn" data-username="{{ result.user_id }}">View Profile</button>
                         {% endfor %}
                     </ul>
-                {% elif no_results %}
-                    <p>No results found.</p>
                 {% else %}
-                    <p>No query parameters provided.</p>
+                    <p>No results found.</p>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    <script>
+        // Add event listener to all view profile buttons
+        document.querySelectorAll('.view-profile-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Extract the username from the data attribute
+                const username = this.dataset.username;
+                // Make a GET request to the viewprofile route with the username as a query parameter
+                fetch(`/viewprofile?username=${username}`)
+                    .then(response => {
+                        // Check if the response status is OK
+                        if (response.ok) {
+                            // Redirect to the viewprofile page
+                            window.location.href = response.url;
+                        } else {
+                            // Handle error
+                            console.error('Error:', response.statusText);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
 {% endblock %}
