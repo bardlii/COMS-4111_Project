@@ -137,7 +137,7 @@ def login():
 
         if error is None:
             session.clear()
-            session['user_id'] = user_out['user_id']
+            session['user_id'] = user_out[0]
             return redirect(url_for('feed'))
 
         flash(error)
@@ -317,8 +317,8 @@ def feed():
         WHERE :user_id IN (C.User_id1, C.User_id2)
         ORDER BY P.Creation_date DESC
     """)
-    post_out_raw = g.conn.execute(posts_query, {"user_id": user_id}).fetchall()
-    post_out = [dict(row) for row in post_out_raw]
+    post_out = g.conn.execute(posts_query, {"user_id": user_id}).fetchall()
+    #post_out = [dict(row) for row in post_out_raw]
     print(post_out)
 
     return render_template('feed.html', posts=post_out)
