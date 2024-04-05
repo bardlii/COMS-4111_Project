@@ -11,7 +11,11 @@
     <div class="profile-info">
         <h2>User Information</h2>
         <p><strong>User ID:</strong> {{ cp['user_id'] }}</p>
-        <p><strong>Location:</strong> {{ cl['location'] }}</p>
+        <p><strong>Location:</strong>
+            {% for loc in cl %}
+                {{ loc['location'] }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </p>
         <p><strong>Field:</strong> {{ cp['field'] }}</p>
         <p><strong>Bio:</strong> {{ u['bio'] }}</p>
         <p><strong>Image:</strong> {{ u['image_url'] }}</p>
