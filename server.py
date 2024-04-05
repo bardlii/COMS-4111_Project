@@ -201,20 +201,39 @@ def groups():
         group_id = request.form.get('group_id')
         user_id = session.get('user_id')
 
+        error = None
+
         if action == 'join':
             # Insert into GROUP_MEMBERS table
-            g.conn.execute(text("INSERT INTO GROUP_MEMBERS (Group_id, User_id) VALUES (:group_id, :user_id)"), {"group_id": group_id, "user_id": user_id})
-
-            # Update Number_of_members in GROUPS table
-            g.conn.execute(text("UPDATE GROUPS SET Number_of_members = Number_of_members + 1 WHERE Group_id = :group_id"), {"group_id": group_id})
+            try:
+                g.conn.execute(text("INSERT INTO GROUP_MEMBERS (Group_id, User_id) VALUES (:group_id, :user_id)"), {"group_id": group_id, "user_id": user_id})
+                # Update Number_of_members in GROUPS table
+                g.conn.execute(text("UPDATE GROUPS SET Number_of_members = Number_of_members + 1 WHERE Group_id = :group_id"), {"group_id": group_id})
+                
+                g.conn.commit()
+                flash('Group joined successfully!', 'success')
             
-        elif action == 'leave':
-            # Remove from GROUP_MEMBERS table
-            g.conn.execute(text("DELETE FROM GROUP_MEMBERS WHERE Group_id = :group_id AND User_id = :user_id"), {"group_id": group_id, "user_id": user_id})
-
-            # Update Number_of_members in GROUPS table
-            g.conn.execute(text("UPDATE GROUPS SET Number_of_members = Number_of_members - 1 WHERE Group_id = :group_id"), {"group_id": group_id})
+            except Exception as e:
+                error = str(e)
+                g.conn.rollback()
+                flash(f'An error occurred: {error}', 'error')
         
+        elif action == 'leave':
+            try:
+                # Remove from GROUP_MEMBERS table
+                g.conn.execute(text("DELETE FROM GROUP_MEMBERS WHERE Group_id = :group_id AND User_id = :user_id"), {"group_id": group_id, "user_id": user_id})
+
+                # Update Number_of_members in GROUPS table
+                g.conn.execute(text("UPDATE GROUPS SET Number_of_members = Number_of_members - 1 WHERE Group_id = :group_id"), {"group_id": group_id})
+
+                g.conn.commit()
+                flash('Group left successfully!', 'success')
+
+            except Exception as e:
+                error = str(e)
+                g.conn.rollback()
+                flash(f'An error occurred: {error}', 'error')
+
         return redirect(url_for('groups'))
 
 
@@ -241,11 +260,11 @@ def create_event():
                 text('INSERT INTO EVENT (User_id, Post_number, Associated_date) VALUES (:user_id, (SELECT MAX(Post_number) FROM POST WHERE User_id = :user_id), :associated_date)'),
                 {"user_id": user_id, "associated_date": associated_date}
             )
-            #g.conn.commit()
+            g.conn.commit()
             flash('Event created successfully!', 'success')
         except Exception as e:
             error = str(e)
-            #g.conn.rollback()
+            g.conn.rollback()
             flash(f'An error occurred: {error}', 'error')
       
     return render_template('event.html')
@@ -273,10 +292,11 @@ def announce():
                 text('INSERT INTO ANNOUNCEMENT (User_id, Post_number) VALUES (:user_id, (SELECT MAX(Post_number) FROM POST WHERE User_id = :user_id))'),
                 {"user_id": user_id}
             )
-            #g.conn.commit()
+            g.conn.commit()
             flash('Announcement created successfully!', 'success')
         except Exception as e:
             error = str(e)
+            g.conn.rollback()
             flash(f'An error occurred: {error}', 'error')
 
     return render_template('announce.html')
@@ -310,7 +330,7 @@ def feed():
         })
     
     posts_query = text("""  
-        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
+        SELECT DISTINCT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
         FROM Connect AS C
         JOIN POST AS P ON ((C.User_id1 = P.User_id OR C.User_id2 = P.User_id) AND C.Connection_status = 'Connected')
         LEFT JOIN post_interaction AS PI ON (P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number)
@@ -318,7 +338,6 @@ def feed():
         ORDER BY P.Creation_date DESC
     """)
     post_out = g.conn.execute(posts_query, {"user_id": user_id}).fetchall()
-    #post_out = [dict(row) for row in post_out_raw]
     print(post_out)
 
     return render_template('feed.html', posts=post_out)
@@ -465,8 +484,10 @@ def conversation():
                 INSERT INTO message (sender, receiver, text, text_date)
                 VALUES (:user_id, :username, :message, :date)
             """), {"user_id": user_id, "username": username, "message": message, "date": date.today()})
+            g.conn.commit()
             flash('Message sent successfully!', 'success')
         except Exception as e:
+            g.conn.rollback()
             print("Error executing SQL query:", e)
 
 
