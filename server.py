@@ -330,7 +330,7 @@ def feed():
         })
     
     posts_query = text("""  
-        SELECT DISTINCT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
+        SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
         FROM Connect AS C
         JOIN POST AS P ON ((C.User_id1 = P.User_id OR C.User_id2 = P.User_id) AND C.Connection_status = 'Connected')
         LEFT JOIN post_interaction AS PI ON (P.User_id = PI.Post_owner_id AND P.Post_number = PI.Post_number)
