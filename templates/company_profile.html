@@ -40,13 +40,13 @@
 
     <div class="job-listings">
         <h2>Job Listings</h2>
-        {% if job_listings %}
+        {% if jl %}
             <ul>
-                {% for job in job_listings %}
+                {% for job in jl %}
                     <li>
-                        <strong>Position:</strong> {{ jl['position'] }}<br>
-                        <strong>Location:</strong> {{ jl['location'] }}<br>
-                        <strong>Description:</strong> {{ jl['description'] }}
+                        <strong>Position:</strong> {{ job['position'] }}<br>
+                        <strong>Location:</strong> {{ job['location'] }}<br>
+                        <strong>Description:</strong> {{ job['description'] }}
                     </li>
                 {% endfor %}
             </ul>
