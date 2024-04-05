@@ -317,17 +317,27 @@ def feed():
         post_owner_id = request.form['post_owner_id']  # Extract post_owner_id from form data
         post_number = request.form['post_number']  # Extract post_number from form data
 
+        error = None
+
         # Insert reaction and comment into the database
-        g.conn.execute(text("""
-            INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
-            VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
-        """), {
-            "reaction": reaction,
-            "comment": comment,
-            "post_owner_id": post_owner_id,
-            "post_number": post_number,
-            "reacting_user_id": user_id
-        })
+        try:
+            g.conn.execute(text("""
+                INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
+                VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
+            """), {
+                "reaction": reaction,
+                "comment": comment,
+                "post_owner_id": post_owner_id,
+                "post_number": post_number,
+                "reacting_user_id": user_id
+            })
+            g.conn.commit()
+            flash('Reacted & Commented successfully!', 'success')
+
+        except Exception as e:
+            error = str(e)
+            g.conn.rollback()
+            flash(f'An error occurred: {error}', 'error')
     
     posts_query = text("""  
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
@@ -351,11 +361,21 @@ def for_you():
         comment = request.form['comment']
         post_owner_id = request.form['post_owner_id']
         post_number = request.form['post_number']
-        g.conn.execute(text("""
-            INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
-            VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
-        	"""), {"reaction": reaction, "comment": comment, "post_owner_id": post_owner_id, "post_number": post_number, "reacting_user_id": user_id}
-        )
+        
+        try:
+            g.conn.execute(text("""
+                INSERT INTO post_interaction (reaction, comment, post_owner_id, post_number, reacting_user_id)
+                VALUES (:reaction, :comment, :post_owner_id, :post_number, :reacting_user_id)
+                """), {"reaction": reaction, "comment": comment, "post_owner_id": post_owner_id, "post_number": post_number, "reacting_user_id": user_id}
+            )
+            g.conn.commit()
+            flash('Reacted & Commented successfully!', 'success')
+
+        except Exception as e:
+            error = str(e)
+            g.conn.rollback()
+            flash(f'An error occurred: {error}', 'error')
+
     page = text("""
         SELECT P.User_id AS Post_owner_id, P.Post_number, P.Creation_date AS Post_creation_date, P.Image_URL AS Post_image_url, P.Text AS Post_text, PI.Reaction, PI.Comment, PI.Reacting_user_id
         FROM POST AS P
